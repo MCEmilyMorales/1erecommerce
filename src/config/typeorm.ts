@@ -18,8 +18,8 @@ const config = {
   entities: ['dist/**/*.entity{.ts,.js}'],
   migrations: ['dist/migrations/*{.ts,.js}'],
   logging: false,
-  synchronize: true, // ayuda a sincronizar con la base de datos
-  dropSchema: true,
+  synchronize: false, // ayuda a sincronizar con la base de datos
+  dropSchema: false,
 };
 console.log('DB_HOST:', process.env.DB_HOST);
 
