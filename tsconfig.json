@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "resolveJsonModule": true,
+    "types": ["multer", "jest"],
+  }
+}
+/* multer es un middleware= software intermedio, libreria que maneja datos de formularios en formato multipar/form-data. gralm se usa para archivos, img, doc, junto con otros datos del formulario. */
+/* jest es un marco de pruebas para javascript, le permito a typescript que reconozca las deficiones de tipos de jest.*/
