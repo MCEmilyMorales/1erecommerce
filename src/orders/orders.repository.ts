@@ -1,7 +1,13 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
+
+import { User } from 'src/users/user.entity';
 import { Order } from './order.entity';
 import { Product } from 'src/products/product.entity';
 import { OrderDetails } from 'src/orderDetails/orderDetails.entity';
@@ -18,22 +24,18 @@ export class OrdersRepository {
     private readonly orderDetailsRepository: Repository<OrderDetails>,
   ) {}
 
-  async addOrder(userId, products) {
-    console.log(`Buscando usuario con ID: ${userId}`);
+  async addOrder(userId: string, products) {
+    let total = 0;
+
     const user = await this.usersRepository.findOneBy({ id: userId });
     if (!user) {
-      console.error('Id usuario no encontrado...');
-      return 'Id usuario no encontrado...';
+      throw new NotFoundException('Id usuario no encontrado...');
     }
-    console.log('Usuario encontrado:', user);
 
     const orders = new Order();
     orders.date = new Date();
     orders.user = user;
     await this.orderRepository.save(orders);
-    console.log('Order guardada:', orders);
-
-    let total = 0;
 
     const detalle = new OrderDetails();
     detalle.orders = orders;
@@ -51,11 +53,9 @@ export class OrdersRepository {
           });
 
           if (!productEntity) {
-            console.error('Producto no encontrado:', idProduct);
             throw new NotFoundException('Producto no encontrado');
           }
           if (productEntity.stock <= 0) {
-            console.error('No hay más productos:', idProduct);
             throw new HttpException(
               `No hay más productos: ${productEntity.name}`,
               HttpStatus.BAD_REQUEST,
@@ -64,7 +64,6 @@ export class OrdersRepository {
 
           productEntity.stock -= 1; // Decrementar el stock en lugar de establecerlo en -1
           await this.productRepository.save(productEntity);
-          console.log('Producto actualizado:', productEntity);
 
           detalle.product.push(productEntity);
 
@@ -76,12 +75,10 @@ export class OrdersRepository {
       );
       detalle.price = total;
     } else {
-      console.error('La lista de productos está vacía.');
       throw new NotFoundException('La lista de productos está vacía.');
     }
 
     await this.orderDetailsRepository.save(detalle);
-    console.log('Detalle de la orden guardado:', detalle);
 
     return {
       orderId: orders.id,
@@ -90,9 +87,7 @@ export class OrdersRepository {
     };
   }
 
-  async getOrder(idOrder:string) {
-    console.log(idOrder);
-    
+  async getOrder(idOrder: string) {
     const order = await this.orderRepository.findOne({
       where: { id: idOrder },
       relations: {
@@ -101,10 +96,9 @@ export class OrdersRepository {
         },
       },
     });
-console.log(order);
 
     if (!order) {
-      throw new Error('No encontrado.');
+      throw new NotFoundException('Orden no encontrada.');
     }
 
     return order;

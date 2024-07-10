@@ -1,9 +1,11 @@
 import { Exclude } from "class-transformer";
 import { Order } from "../orders/order.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { ApiProperty } from "@nestjs/swagger";
 
 @Entity({ name: 'users' })
 export class User {
+  @ApiProperty({ description: 'El id sera del tipo UUID, generado por la DB' })
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -20,13 +22,13 @@ export class User {
   phone: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  country?: string;
+  country: string;
 
   @Column({ type: 'text' })
   address: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  city?: string;
+  city: string;
 
   @OneToMany((user) => Order, (order) => order.user)
   orders?: Order[]; //relacion 1:N con Order

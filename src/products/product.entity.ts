@@ -1,6 +1,14 @@
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+
 import { Category } from '../categories/category.entity';
 import { OrderDetails } from '../orderDetails/orderDetails.entity';
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'products' })
 export class Product {
@@ -28,7 +36,7 @@ export class Product {
 
   @ManyToOne((product) => Category, (category) => category.product)
   category: Category; //relacion de un producto con una categoria, y ademas va a ir a buscar en la db, el uuid que corresponde en base a la categoria
-// va a ser un solo registro de categorias
+  
   @ManyToMany((product) => OrderDetails, (orderDetails) => orderDetails.product)
   @JoinTable()
   orderdetails: OrderDetails[]; // relacion de N:N

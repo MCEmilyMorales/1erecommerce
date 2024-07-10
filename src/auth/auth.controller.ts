@@ -1,8 +1,9 @@
 import { Body, ClassSerializerInterceptor, Controller, Get, Post, UseGuards, UseInterceptors } from "@nestjs/common";
+import { ApiTags } from "@nestjs/swagger";
+
 import { AuthService } from "./auth.service";
 import { LoginUserDto } from "./loginUser.Dto";
 import { CreateUserDto } from "src/users/users.dto";
-import { ApiTags } from "@nestjs/swagger";
 
 @ApiTags('auth')
 @Controller('auth')

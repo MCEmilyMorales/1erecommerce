@@ -1,10 +1,25 @@
-import { BadRequestException } from "@nestjs/common";
-import { ApiHideProperty } from "@nestjs/swagger";
-import { IsEmail, IsEmpty, IsNotEmpty, IsNumber, IsOptional, IsString, IsStrongPassword, Matches, MaxLength, MinLength, Validate, ValidateIf, ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from "class-validator";
+import {
+  IsEmail,
+  IsEmpty,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsStrongPassword,
+  Matches,
+  MaxLength,
+  MinLength,
+  Validate,
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
+import { BadRequestException } from '@nestjs/common';
+import { ApiHideProperty, PickType } from '@nestjs/swagger';
 
 @ValidatorConstraint({ async: false })
 export class PasswordsMatch implements ValidatorConstraintInterface {
-  validate(confirmPassword: any, args: ValidationArguments) {
+  validate(confirmPassword: string, args: ValidationArguments) {
     const { password } = args.object as any;
     if (password !== confirmPassword) {
       throw new BadRequestException('Las contraseñas no coinciden');
@@ -15,8 +30,8 @@ export class PasswordsMatch implements ValidatorConstraintInterface {
 
 export class CreateUserDto {
   /**
-   * Esta es la propiedad name
-   * @example Fulanito
+   * Propiedad: Nombre de usuario
+   * @example prueba
    */
   @IsNotEmpty()
   @IsString()
@@ -25,16 +40,16 @@ export class CreateUserDto {
   name: string;
 
   /**
-   * Esta es la propiedad email
-   * @example fulanito@email.com
+   * Propiedad: Email de usuario
+   * @example example@email.com
    */
   @IsNotEmpty()
   @IsEmail()
   email: string;
 
   /**
-   * Esta es la propiedad password
-   * @example aaAA11!!
+   * Propiedad: Password de usuario debe contener al menos 8 caracteres, incluyendo minúsculas, mayúsculas, números y símbolos !@#$%^&*
+   * @example prueba0!
    */
   @IsNotEmpty({ message: 'La contraseña no puede estar vacía.' })
   @IsString()
@@ -55,25 +70,26 @@ export class CreateUserDto {
   password: string;
 
   /**
-   * Esta es la propiedad confirmPassword
-   * @example aaAA11!!
+   * Propiedad: confirmPassword debe ser la misma que el password del usuario
+   * @example Prueba0!
    */
   @IsNotEmpty()
   @IsString()
-  @Validate(PasswordsMatch)
+  @Validate(PasswordsMatch) 
   confirmPassword: string;
 
   /**
-   * Esta es la propiedad address
+   * Propiedad: address debe ser una direccion
    * @example calle falsa 1234
    */
+  @IsNotEmpty()
   @IsString()
   @MinLength(3)
   @MaxLength(80)
   address: string;
 
   /**
-   * Esta es la propiedad phone
+   * Propiedad: phone debe ser un número de telefono
    * @example 3518880000
    */
   @IsNotEmpty()
@@ -81,44 +97,38 @@ export class CreateUserDto {
   phone: number;
 
   /**
-   * Esta es la propiedad country
+   * Propiedad: country debe ser un pais
    * @example Argentina
    */
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @MinLength(4)
   @MaxLength(20)
   country: string;
 
   /**
-   * Esta es la propiedad city
+   * Propiedad: city debe ser una ciudad
    * @example Córdoba
    */
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @MinLength(5)
   @MaxLength(20)
   city: string;
 
   /**
-   * Esta es la propiedad isAdmin
+   * Propiedad: isAdmin, por defecto debe ser un usuario
    * @example user
    */
   @ApiHideProperty()
   @IsEmpty()
-  @IsOptional()
   isAdmin?: boolean;
 }
 
-  // @Matches(/^(?=(.*[a-z]){1,})/, {
-  //   message: 'La contraseña debe tener al menos 1 letra minúscula',
-  // })
-  // @Matches(/^(?=.*[A-Z])/, {
-  //   message: 'La contraseña debe tener al menos 1 letra mayúscula',
-  // })
-  // @Matches(/^(?=.*\d)/, {
-  //   message: 'La contraseña debe tener al menos 1 número',
-  // })
-  // @Matches(/^(?=.*[!@#$%^&*])/, {
-  //   message: 'La contraseña debe tener al menos 1 carácter: !@#$%^&*',
-  // })
+export class UpdateUserDto extends PickType(CreateUserDto, [
+  'name',
+  'address',
+  'phone',
+  'city',
+  'country',
+]) {}

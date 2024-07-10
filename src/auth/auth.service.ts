@@ -1,11 +1,11 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
-import * as bcrypt from 'bcrypt'
+import { BadRequestException, Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
-import { User } from "src/users/user.entity";
-import { UsersRepository } from "src/users/users.repository";
-import { CreateUserDto } from "src/users/users.dto";
-import { JwtService } from "@nestjs/jwt";
-import { Role } from "src/roles.enum";
+import { User } from 'src/users/user.entity';
+import { UsersRepository } from 'src/users/users.repository';
+import { CreateUserDto } from 'src/users/users.dto';
+import { Role } from 'src/roles.enum';
 
 @Injectable()
 export class AuthService {
@@ -18,10 +18,6 @@ export class AuthService {
   }
 
   async signin(email: string, password: string) {
-    if (!email || !password) {
-      return 'Por favor, envia todos los datos';
-    }
-
     const userId = await this.usersRepository.getUserByEmail(email);
     if (!userId) {
       throw new BadRequestException('Credenciales incorrectas');

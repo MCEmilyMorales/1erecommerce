@@ -1,59 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { User as UserFack } from "./fackUsers.interface";
 import { User } from './user.entity';
 import { CreateUserDto } from "./users.dto";
 
-export const users: UserFack[] = [
-  {
-    id: '1',
-    email: 'john.doe@example.com',
-    name: 'John Doe',
-    password: 'password123',
-    address: '123 Main St',
-    phone: '555-1234',
-    country: 'USA',
-    city: 'New York',
-  },
-  {
-    id: '2',
-    email: 'jane.smith@example.com',
-    name: 'Jane Smith',
-    password: 'password456',
-    address: '456 Elm St',
-    phone: '555-5678',
-    country: 'Canada',
-    city: 'Toronto',
-  },
-  {
-    id: '3',
-    email: 'alice.jones@example.com',
-    name: 'Alice Jones',
-    password: 'password789',
-    address: '789 Oak St',
-    phone: '555-9876',
-    country: 'UK',
-    city: 'London',
-  },
-  {
-    id: '4',
-    email: 'bob.brown@example.com',
-    name: 'Bob Brown',
-    password: 'password321',
-    address: '321 Pine St',
-    phone: '555-6543',
-  },
-  {
-    id: '5',
-    email: 'jane.doe@example.com',
-    name: 'Jane Doe',
-    password: 'securepassword456',
-    address: '789 Maple Ave',
-    phone: '555-7890',
-  },
-];
 
 @Injectable()
 export class UsersRepository {
@@ -76,27 +27,20 @@ export class UsersRepository {
       relations: ['orders'],
     });
     if (!user) {
-      return 'El usuario no existe. ';
+      throw new NotFoundException(`Usuario con Id: ${id} no encontrado`);
     }
-    //const {isAdmin, ...userSinIsAdmin} = user
     return user;
   }
 
-  async createUser(user: CreateUserDto): Promise<Partial<User>> {
+  async createUser(user: Omit<CreateUserDto, 'confirmPassword'>): Promise<Partial<User>> {
     const savedUser = await this.usersRepository.save(user);
-    console.log(
-      //plainObjectToEntityTransformer
-      'Prueba de lo que devuelve el repositorio de user: ',
-      Object.assign(this, user),
-    );
     return savedUser;
   }
 
-  async updateUser(id: string, updatedUser: any) {
+  async updateUser(id: string, updatedUser: Partial<User>) {
     const user = await this.usersRepository.findOne({ where: { id } });
-    console.log(user);
     if (!user) {
-      return `No se encontro al usuario con el id enviado.`;
+      throw new NotFoundException(`Usuario con Id: ${id} no encontrado`);
     }
     const compare = { ...user, ...updatedUser };
     const updated = await this.usersRepository.save(compare);
@@ -106,7 +50,7 @@ export class UsersRepository {
   async deleteUser(id: string) {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
-      return 'Usuario no encontrado';
+      throw new NotFoundException(`Usuario con Id: ${id} no encontrado`);
     }
     const remove = await this.usersRepository.remove(user);
     return remove;

@@ -1,16 +1,34 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseInterceptors, Query, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Put,
+  Delete,
+  Param,
+  Body,
+  UseInterceptors,
+  Query,
+  UseGuards,
+  ParseUUIDPipe,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiTags,
+  PartialType,
+} from '@nestjs/swagger';
+
 import { UsersService } from './users.service';
-import { HideCredentialInterceptor } from 'src/interceptors/hide-credential.interceptor';
-import { User as UserFack} from './fackUsers.interface';
+import { HideCredentialsAndRolInterceptor } from 'src/interceptors/hide-credential.interceptor';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { CreateUserDto } from './users.dto';
+import { CreateUserDto, UpdateUserDto } from './users.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/roles.enum';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('users')
 @Controller('users')
+@UseGuards(AuthGuard) //*para proteger todas las rutas con guardianes
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -18,6 +36,7 @@ export class UsersController {
   @Get()
   @Roles(Role.Admin)
   @UseGuards(AuthGuard, RolesGuard)
+  @UseInterceptors(HideCredentialsAndRolInterceptor)
   getUsers(
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '5',
@@ -25,72 +44,36 @@ export class UsersController {
     return this.usersService.getUsers(Number(page), Number(limit));
   }
 
+  @ApiBearerAuth()
   @Get(':id')
   @UseGuards(AuthGuard)
-  @UseInterceptors(HideCredentialInterceptor)
+  @UseInterceptors(HideCredentialsAndRolInterceptor)
   getUserById(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.getUserById(id);
   }
 
-  // @UseInterceptors(HideCredentialInterceptor)
-  // @Post()
-  // async createUser(@Body() user: CreateUserDto) {
-  //   return await this.usersService.createUser(user);
-  // }
-
+  @ApiBearerAuth()
   @Put(':id')
   @UseGuards(AuthGuard)
+  @UseInterceptors(HideCredentialsAndRolInterceptor)
+  @ApiParam({ name: 'id', type: 'string', description: 'Id del usuario' })
+  @ApiBody({
+    type: PartialType(CreateUserDto),
+    description: 'Datos de usuario actualizados',
+  })
   updateUser(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() updatedUser: Partial<CreateUserDto>,
+    @Body() updatedUser: Partial<UpdateUserDto>,
   ) {
     return this.usersService.updateUser(id, updatedUser);
   }
 
   @ApiBearerAuth()
   @Delete(':id')
-  @UseGuards(AuthGuard)
+  @UseInterceptors(HideCredentialsAndRolInterceptor)
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard, RolesGuard)
   deleteUser(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.deleteUser(id);
   }
 }
-
-/*
-
-@UseGuards(AuthGuard)
-  @Get()
-  getUser(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '5',
-  ) {
-    return this.usersService.getUsers(Number(page), Number(limit));
-  }
-
-  @UseGuards(AuthGuard)
-  @UseInterceptors(HideCredentialInterceptor)
-  @Get(':id')
-  getUserById(@Param('id') id: string) {
-    return this.usersService.getUserById(id);
-  }
-
-  @UseInterceptors(HideCredentialInterceptor)
-  @Post()
-  createUser(@Body() user) {
-    return this.usersService.createUser(user);
-  }
-
-  @UseGuards(AuthGuard)
-  @Put(':id')
-  updateUser(
-    @Param('id') id: string,
-    @Body() updatedUser: Partial<UserFack[]>,
-  ) {
-    return this.usersService.updateUser(id, updatedUser);
-  }
-
-  @UseGuards(AuthGuard)
-  @Delete(':id')
-  deleteUser(@Param('id') id: string) {
-    return this.usersService.deleteUser(id);
-  }
- */
